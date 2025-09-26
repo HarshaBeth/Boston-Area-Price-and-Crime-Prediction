@@ -1,6 +1,10 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
+import ProgressBar from "../components/ProgressBar";
 
 function Evaluation() {
+  const [crimeRate, setCrimeRate] = useState(5.2);
+  const [price, setPrice] = useState(120000);
   return (
     <div className="flex justify-center items-center h-screen w-full">
       {/* Left and Right */}
@@ -13,9 +17,16 @@ function Evaluation() {
               <p className="text-gray-400">Boston &gt; Washington St</p>
               <h1 className="font-bold text-4xl italic">Residence Overview</h1>
             </div>
-            <div>
-              <p>Washington St Crime Rate: 5.2 %</p>
-              <p>Average Price: $1,200,000</p>
+            <div className="space-y-2">
+              <div>
+                <p>Washington St Crime Rate: {crimeRate} %</p>
+                <ProgressBar progress_value={crimeRate} total={100} />
+              </div>
+
+              <div>
+                <p>Average Price: ${price.toLocaleString()}</p>
+                <ProgressBar progress_value={price} total={200000} />
+              </div>
               <p>Common crime(s): Theft</p>
               <p>Nearby Transport: Bus, Subway</p>
             </div>

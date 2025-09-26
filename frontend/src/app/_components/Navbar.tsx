@@ -15,7 +15,10 @@ function Navbar() {
           >
             Visualizations
           </Link>
-          <Link href={""} className="hover:text-green-500 transition">
+          <Link
+            href={"#visualization"}
+            className="hover:text-green-500 transition"
+          >
             Contact
           </Link>
         </div>
