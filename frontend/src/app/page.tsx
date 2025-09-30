@@ -1,13 +1,9 @@
-import Evaluation from "./_components/Evaluation";
-import Landing from "./_components/Landing";
-import Visualization from "./_components/Visualization";
+import HomePage from "./_components/HomePage";
 
 export default function Home() {
   return (
     <div>
-      <Landing />
-      <Evaluation />
-      <Visualization />
+      <HomePage />
     </div>
   );
 }
