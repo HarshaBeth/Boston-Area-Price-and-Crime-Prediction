@@ -1,9 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import LandingImage from "../../../public/background_housing2.jpg";
 import SearchIcon from "../../../public/search.png";
 
-function Landing() {
+type LandingProps = {
+  location?: string;
+  setLocation: (location: string) => void;
+};
+
+function Landing({ location, setLocation }: LandingProps) {
   return (
     <div className="relative h-screen w-full">
       <Image
@@ -24,6 +29,8 @@ function Landing() {
           <div className="flex justify-between items-center relative">
             <input
               type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
               placeholder="Enter location or district code..."
               className="w-[500px] bg-white rounded-full h-14 px-6 text-lg focus:outline-none focus:shadow-inner focus:shadow-outline"
             />
