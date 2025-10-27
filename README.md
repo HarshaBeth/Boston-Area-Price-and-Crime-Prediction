@@ -89,7 +89,7 @@ This project combines multiple years of crime records in Boston with housing pri
 4. **Hourly Distribution of Top 5 Crime Types**  
    - Top crimes include *Larceny, Motor Vehicle Accident Response, Medical Assistance, Investigate Person*.  
    - Most frequent during the day (morning to evening hours).  
-   - Nighttime sees fewer incidents across all categories.
+   - Evening time sees more incidents across all categories.
 
 5. **Top 20 Crime Types (Bar Chart)**  
    - Most common: **Motor Vehicle Accident Response, Larceny, Medical Assistance**.  
