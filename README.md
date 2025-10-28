@@ -45,7 +45,11 @@
 
 <p align="justify">The project is built on an aggregation of the Boston Crime Dataset and the Boston Housing Dataset. These are detailed datasets up until 2025 that are effective in providing realistic predictions. The datasets will be divided into training and testing sets, 80% and 20% respectively.</p>
 
+
+
 # Crime and Housing Price Data Analysis
+
+Link to YT explanation: https://youtu.be/Ly8c4S4XE5I
 
 This project combines multiple years of crime records in Boston with housing price datasets. We perform preprocessing to clean the data and generate visualizations to better understand trends, distributions, and relationships.
 
