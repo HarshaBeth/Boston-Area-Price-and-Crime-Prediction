@@ -6,6 +6,7 @@ It implements:
 - parameter initialization (zeros)
 - mean squared error cost function
 - analytical gradients
+- mini-batch gradient descent instead of full-batch
 - parameter update rule (gradient descent)
 - training loop with per-iteration loss logs
 """
@@ -22,7 +23,7 @@ import pickle
 
 
 class PriceRegressionModel:
-    """Simple regression trained via batch gradient descent."""
+    """Simple regression trained via mini-batch gradient descent."""
 
     SUPPORTED_SAVE_FORMATS: ClassVar[Tuple[str, ...]] = (
         "pkl",
@@ -93,6 +94,7 @@ class PriceRegressionModel:
             "learning_rate": training_params.get("learning_rate"),
             "num_iterations": training_params.get("num_iterations"),
             "log_every": training_params.get("log_every"),
+            "mini_batch_size": training_params.get("mini_batch_size"),
             "degree": self._degree,
             "cost_function": self._cost_function,
             "initial_weights": training_params.get("initial_weights"),
@@ -198,6 +200,7 @@ class PriceRegressionModel:
         num_iterations: int,
         log_every: int,
         degree: int,
+        mini_batch_size: int,
         cost_function: str,
     ) -> str:
         if learning_rate <= 0:
@@ -208,6 +211,8 @@ class PriceRegressionModel:
             raise ValueError("log_every must be at least 1")
         if degree < 1:
             raise ValueError("degree must be at least 1")
+        if mini_batch_size < 1:
+            raise ValueError("mini_batch_size must be at least 1")
         normalized_cost = cost_function.lower()
         if normalized_cost != "mse":
             raise ValueError("Only 'mse' cost_function is currently supported")
@@ -222,6 +227,7 @@ class PriceRegressionModel:
         learning_rate: float = 0.01,
         num_iterations: int = 1_000,
         log_every: int = 1,
+        mini_batch_size: int = 25,
         cost_function: str = "mse",
         initial_weights: Optional[Sequence[float]] = None,
         initial_bias: Optional[float] = None,
@@ -231,6 +237,7 @@ class PriceRegressionModel:
             num_iterations,
             log_every,
             degree,
+            mini_batch_size,
             cost_function,
         )
 
@@ -246,6 +253,7 @@ class PriceRegressionModel:
             "learning_rate": learning_rate,
             "num_iterations": num_iterations,
             "log_every": log_every,
+            "mini_batch_size": mini_batch_size,
             "cost_function": normalized_cost,
             "initial_weights": stored_initial_weights,
             "initial_bias": initial_bias,
@@ -263,16 +271,27 @@ class PriceRegressionModel:
         )
         self.history = []
 
-        for iteration in range(1, num_iterations + 1):
-            predictions = self._predict_raw(design_matrix)
-            loss = self._compute_loss(y_array, predictions)
-            grad_w, grad_b = self._compute_gradients(
-                design_matrix, y_array, predictions
-            )
-            self._update_parameters(grad_w, grad_b, learning_rate)
+        n_samples = design_matrix.shape[0]
+        batch_size = min(mini_batch_size, n_samples)
 
-            if iteration % log_every == 0:
-                self.history.append(loss)
+        rng = np.random.default_rng()
+        for iteration in range(1, num_iterations + 1):
+            indices = rng.permutation(n_samples)
+            batch_losses: List[float] = []
+            for start in range(0, n_samples, batch_size):
+                batch_idx = indices[start:start + batch_size]
+                batch_X = design_matrix[batch_idx]
+                batch_y = y_array[batch_idx]
+                predictions = self._predict_raw(batch_X)
+                loss = self._compute_loss(batch_y, predictions)
+                grad_w, grad_b = self._compute_gradients(
+                    batch_X, batch_y, predictions
+                )
+                self._update_parameters(grad_w, grad_b, learning_rate)
+                batch_losses.append(loss)
+
+            if iteration % log_every == 0 and batch_losses:
+                self.history.append(float(np.mean(batch_losses)))
 
         self.is_fitted_ = True
         return self
@@ -347,6 +366,9 @@ class PriceRegressionModel:
                 "learning_rate": self._training_params.get("learning_rate"),
                 "num_iterations": self._training_params.get("num_iterations"),
                 "log_every": self._training_params.get("log_every"),
+                "mini_batch_size": self._training_params.get(
+                    "mini_batch_size"
+                ),
                 "cost_function": self._cost_function,
             },
         }

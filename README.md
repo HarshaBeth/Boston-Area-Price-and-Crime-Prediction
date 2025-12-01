@@ -26,7 +26,7 @@
 
 ### Modeling the project
 
-1. Price prediction and crime prediction are regression tasks, hence, we will implement Linear Regression, Logistic Regression, and Random Forest Regression.
+1. Price prediction and crime prediction are regression tasks, hence, we will implement Linear or Polynomial Regression, Logistic Regression, and Random Forest Regression.
 2. These models will be tested on our dataset to get the most suitable model.
 
 ### Data Visualization
