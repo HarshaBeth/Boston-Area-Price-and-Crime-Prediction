@@ -23,8 +23,28 @@ import pickle
 
 
 class PriceRegressionModel:
-    """Simple regression trained via mini-batch gradient descent."""
+    """Simple regression model trained via mini-batch gradient descent.
 
+    This model supports polynomial feature expansion and can be saved
+    in multiple formats including pickle, JSON, NumPy, PyTorch, and ONNX.
+
+    Attributes
+    ----------
+    weights_ : Optional[np.ndarray]
+        Learned weight parameters after fitting.
+    bias_ : float
+        Learned bias term after fitting.
+    history : List[float]
+        Training loss history (mean loss per log interval).
+    is_fitted_ : bool
+        Whether the model has been fitted.
+
+    Example
+    -------
+    >>> model = PriceRegressionModel()
+    >>> model.fit(X_train, y_train, degree=2, learning_rate=0.01)
+    >>> predictions = model.predict(X_test)
+    """
     SUPPORTED_SAVE_FORMATS: ClassVar[Tuple[str, ...]] = (
         "pkl",
         "pickle",
@@ -145,8 +165,13 @@ class PriceRegressionModel:
             return X
         if self._degree == 1:
             return X
-        cols = [np.prod(X[:, combo], axis=1) for combo in self._feature_map_]
-        return np.column_stack(cols)
+        result = np.empty(
+            (X.shape[0], len(self._feature_map_)),
+            dtype=np.float64,
+        )
+        for i, combo in enumerate(self._feature_map_):
+            result[:, i] = np.prod(X[:, combo], axis=1)
+        return result
 
     def _initialize_parameters(
         self,
@@ -209,6 +234,8 @@ class PriceRegressionModel:
             raise ValueError("num_iterations must be at least 1")
         if log_every < 1:
             raise ValueError("log_every must be at least 1")
+        if log_every > num_iterations:
+            raise ValueError("log_every must be <= num_iterations")
         if degree < 1:
             raise ValueError("degree must be at least 1")
         if mini_batch_size < 1:
@@ -231,7 +258,27 @@ class PriceRegressionModel:
         cost_function: str = "mse",
         initial_weights: Optional[Sequence[float]] = None,
         initial_bias: Optional[float] = None,
+        random_seed: Optional[int] = None,
     ) -> "PriceRegressionModel":
+        """Fit the regression model using mini-batch gradient descent.
+
+        Args:
+            X: Training features of shape (n_samples, n_features).
+            y: Target values of shape (n_samples,).
+            degree: Polynomial degree for feature expansion (default: 1).
+            learning_rate: Step size for gradient descent (default: 0.01).
+            num_iterations: Number of training epochs (default: 1000).
+            log_every: Log loss every N iterations (default: 1).
+            mini_batch_size: Size of mini-batches (default: 25).
+            cost_function: Loss function, currently only "mse" supported.
+            initial_weights: Optional initial weight values.
+            initial_bias: Optional initial bias value.
+        Returns:
+            self: The fitted model instance.
+
+        Raises:
+            ValueError: If hyperparameters are invalid or data shapes mismatch.
+        """
         normalized_cost = self._validate_hyperparameters(
             learning_rate,
             num_iterations,
@@ -261,10 +308,12 @@ class PriceRegressionModel:
 
         X_array, y_array = self._prepare_data(X, y)
         _, n_raw_features = X_array.shape
-        self._build_feature_map(n_raw_features)
-        design_matrix = (
-            X_array if degree == 1 else self._expand_features(X_array)
-        )
+        if degree > 1:
+            self._build_feature_map(n_raw_features)
+            design_matrix = self._expand_features(X_array)
+        else:
+            self._n_raw_features_ = n_raw_features
+            design_matrix = X_array
         n_features = design_matrix.shape[1]
         self._initialize_parameters(
             n_features, initial_weights, initial_bias
@@ -274,11 +323,12 @@ class PriceRegressionModel:
         n_samples = design_matrix.shape[0]
         batch_size = min(mini_batch_size, n_samples)
 
-        rng = np.random.default_rng()
+        rng = np.random.default_rng(random_seed)
         for iteration in range(1, num_iterations + 1):
             indices = rng.permutation(n_samples)
             batch_losses: List[float] = []
             for start in range(0, n_samples, batch_size):
+                # Last batch may be smaller than batch_size
                 batch_idx = indices[start:start + batch_size]
                 batch_X = design_matrix[batch_idx]
                 batch_y = y_array[batch_idx]
@@ -297,6 +347,19 @@ class PriceRegressionModel:
         return self
 
     def predict(self, X: Sequence[Sequence[float]]) -> np.ndarray:
+        """Make predictions on new data.
+
+        Args:
+            X: Input features of shape (n_samples, n_features).
+
+        Returns:
+            np.ndarray: Predicted values of shape (n_samples,).
+
+        Raises:
+            RuntimeError: If the model hasn't been fitted yet, or if model
+                metadata is missing.
+            ValueError: If input feature dimensions don't match training data.
+        """
         if not self.is_fitted_:
             raise RuntimeError("Call fit before predict.")
         X_array = self._to_numpy_features(X)
@@ -432,6 +495,20 @@ class PriceRegressionModel:
     def save(
         self, output_path: Union[str, Path], fmt: Optional[str] = None
     ) -> Path:
+        """Save the fitted model to disk in the specified format.
+        Args:
+            output_path: Path where the model should be saved.
+            fmt: File format (pkl, pickle, joblib, json, npz, npy, pth, onnx).
+                If None, inferred from file extension (default: None).
+
+        Returns:
+            Path: The actual path where the model was saved.
+
+        Raises:
+            RuntimeError: If the model hasn't been fitted yet.
+            ValueError: If the specified format is not supported.
+            ImportError: If required library for format is not installed.
+        """
         self._ensure_is_fitted()
 
         path = Path(output_path)
