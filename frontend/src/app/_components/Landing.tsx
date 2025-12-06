@@ -9,6 +9,14 @@ type LandingProps = {
 };
 
 function Landing({ location, setLocation }: LandingProps) {
+
+  const [inputValue, setInputValue] = useState(location ?? "");
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    setLocation(inputValue);
+  };
+
   return (
     <div className="relative h-screen w-full">
       <Image
@@ -29,13 +37,15 @@ function Landing({ location, setLocation }: LandingProps) {
           <div className="flex justify-between items-center relative">
             <input
               type="text"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
               placeholder="Enter location or district code..."
               className="w-[500px] bg-white rounded-full h-14 px-6 text-lg focus:outline-none focus:shadow-inner focus:shadow-outline"
             />
-
-            <button className="text-gray-400 absolute right-6 hover:cursor-pointer">
+            <button
+              className="text-gray-400 absolute right-6 hover:cursor-pointer"
+              onClick={handleClick}
+            >
               <Image
                 src={SearchIcon}
                 alt="Search"
