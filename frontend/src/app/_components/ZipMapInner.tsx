@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
+import { useEffect, useState, useRef } from "react";
+import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
+
+const ZIP_PROP = "ZIP5";
 
 type ZipMapInnerProps = {
   selectedZip: string | null; // e.g. "02119"
@@ -9,9 +11,6 @@ type ZipMapInnerProps = {
 
 export default function ZipMapInner({ selectedZip }: ZipMapInnerProps) {
   const [geoData, setGeoData] = useState<any | null>(null);
-
-  // Change this to match your GeoJSON's ZIP field name, e.g. "ZIP5" or "ZCTA5CE10"
-  const ZIP_PROP = "ZIP5";
 
   useEffect(() => {
     fetch("/boston_zipcodes.geojson")
@@ -48,3 +47,44 @@ export default function ZipMapInner({ selectedZip }: ZipMapInnerProps) {
     </MapContainer>
   );
 }
+
+function ZoomableGeoJSON({ data, selectedZip }: { data: any; selectedZip: string | null }) {
+  const map = useMap();
+  const layerRef = useRef<any>(null);
+
+  const style = (feature: any) => {
+    const isSelected = selectedZip && feature.properties["ZIP5"] === selectedZip;
+
+    return {
+      fillColor: isSelected ? "red" : "lightgray",
+      color: "#000",
+      weight: isSelected ? 2 : 1,
+      fillOpacity: isSelected ? 0.6 : 0.15,
+    };
+  };
+
+  useEffect(() => {
+    if (!layerRef.current || !selectedZip) return;
+
+    const layer = layerRef.current;
+    let selectedLayer: any = null;
+
+    layer.eachLayer((l: any) => {
+      if (l.feature?.properties?.[ZIP_PROP] === selectedZip) {
+        selectedLayer = l;
+      }
+    });
+
+    if (selectedLayer) {
+      map.fitBounds(selectedLayer.getBounds(), {
+        padding: [30, 30],
+        maxZoom: 15,
+        animate: true,
+      });
+    }
+  }, [selectedZip, map]);
+
+  {/* @ts-ignore */}
+  return <GeoJSON data={data} style={style} ref={layerRef} />;
+}
+

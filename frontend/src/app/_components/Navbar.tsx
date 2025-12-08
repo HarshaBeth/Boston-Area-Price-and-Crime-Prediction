@@ -6,8 +6,8 @@ function Navbar() {
     <div className="bg-black h-20 w-full flex items-center justify-center">
       <div className="max-w-7xl w-full flex items-center justify-center">
         <div className="text-white font-bold space-x-10 flex items-center">
-          <Link href={""} className="hover:text-green-500 transition">
-            Author
+          <Link href={"#residence_overview"} className="hover:text-green-500 transition">
+            Overview
           </Link>
           <Link
             href={"#visualization"}

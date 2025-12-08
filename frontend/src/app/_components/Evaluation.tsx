@@ -7,9 +7,10 @@ import ZipMap from "./ZipMap";
 
 type EvaluationProps = {
   location?: string;
+  predPrice?: number | null;
 };
 
-function Evaluation({ location }: EvaluationProps) {
+function Evaluation({ location, predPrice }: EvaluationProps) {
 
   const [price, setPrice] = useState(120000);
 
@@ -20,7 +21,7 @@ function Evaluation({ location }: EvaluationProps) {
 
   const hasLocation = Boolean(normalizedZip);
   return (
-    <div className={`flex justify-center items-center h-screen w-full`}>
+    <div className={`flex justify-center items-center h-screen w-full`} id="residence_overview">
       {hasLocation ? (
         <div className="flex flex-row h-full w-full">
           {/* Left Content */}
@@ -35,11 +36,11 @@ function Evaluation({ location }: EvaluationProps) {
               <div className="space-y-2">
 
                 <div>
-                  <p>Average Price: ${price.toLocaleString()}</p>
-                  <ProgressBar progress_value={price} total={200000} />
+                  <p>Estimated Price: ${predPrice ? predPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  {/* <ProgressBar progress_value={price} total={200000} /> */}
                 </div>
-                <p>Common crime(s): Theft</p>
-                <p>Nearby Transport: Bus, Subway</p>
+                {/* <p>Common crime(s): Theft</p>
+                <p>Nearby Transport: Bus, Subway</p> */}
               </div>
             </div>
           </div>

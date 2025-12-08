@@ -1,2 +1,18 @@
-backend/datasets/price_datasets/combined_price_data.csv
-backend/datasets/price_datasets/cleaned_combined_price_data.csv
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+.next/
+
+# Data
+backend/datasets/
+*.csv
+
+# Large models
+*.pkl
+
+# Jupyter
+*.ipynb_checkpoints
