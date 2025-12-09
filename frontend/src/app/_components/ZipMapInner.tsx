@@ -38,7 +38,7 @@ export default function ZipMapInner({ selectedZip }: ZipMapInnerProps) {
     // @ts-ignore
       center={[42.3601, -71.0589]} // Boston
       zoom={12}
-      style={{ height: "100%", width: "100%", borderRadius: "8px" }}
+      style={{ height: "100%", width: "100%" }}
       scrollWheelZoom={false}
     >
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
@@ -87,4 +87,3 @@ function ZoomableGeoJSON({ data, selectedZip }: { data: any; selectedZip: string
   {/* @ts-ignore */}
   return <GeoJSON data={data} style={style} ref={layerRef} />;
 }
-
