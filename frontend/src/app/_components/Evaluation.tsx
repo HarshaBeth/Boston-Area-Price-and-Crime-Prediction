@@ -29,7 +29,11 @@ const OverviewSidePanel = ({
   displayedPrice: number;
   priceRatio: number;
 }) => (
-  <aside className="relative z-10 w-full max-w-[660px] flex-shrink-0 overflow-y-auto border-r border-white/10 bg-white/5 px-10 py-12 backdrop-blur-xl">
+  <aside
+    className={`relative z-10 w-full max-w-[460px] flex-shrink-0 overflow-y-auto border-r border-white/10 bg-white/5 px-10 py-12 backdrop-blur-xl ${
+      !hasLocation ? "opacity-25" : ""
+    }`}
+  >
     <div className="space-y-8">
       <div className="space-y-2">
         <p className="text-xs uppercase tracking-[0.24em] text-slate-200/70">
@@ -38,7 +42,7 @@ const OverviewSidePanel = ({
         <h1 className="text-3xl font-semibold text-white">Residence Overview</h1>
       </div>
 
-      <EstimatedPriceCard displayedPrice={displayedPrice} priceRatio={priceRatio} />
+      <EstimatedPriceCard displayedPrice={displayedPrice} priceRatio={priceRatio} dimmed={!hasLocation} />
 
       <ZipAndStatusCard hasLocation={hasLocation} normalizedZip={normalizedZip} />
     </div>
@@ -48,11 +52,17 @@ const OverviewSidePanel = ({
 const EstimatedPriceCard = ({
   displayedPrice,
   priceRatio,
+  dimmed,
 }: {
   displayedPrice: number;
   priceRatio: number;
+  dimmed?: boolean;
 }) => (
-  <div className="space-y-4 rounded-2xl border border-white/12 bg-white/7 p-6 shadow-inner shadow-white/5">
+  <div
+    className={`space-y-4 rounded-2xl border border-white/12 bg-white/7 p-6 shadow-inner shadow-white/5 ${
+      dimmed ? "opacity-55" : ""
+    }`}
+  >
     <div className="flex items-center justify-between text-sm text-slate-100/80">
       <span className="inline-flex items-center gap-2">
         <IconDollar className="h-4 w-4" />
@@ -88,11 +98,11 @@ const ZipAndStatusCard = ({
   normalizedZip: string | null;
 }) => (
   <div className="grid grid-cols-2 gap-3 text-sm text-slate-100/80">
-    <div className="rounded-xl border border-white/10 bg-white/6 px-4 py-3">
+    <div className={`rounded-xl border border-white/10 bg-white/6 px-4 py-3 ${!hasLocation ? "opacity-55" : ""}`}>
       <p className="text-[0.7rem] uppercase tracking-[0.18em] text-slate-200/70">ZIP</p>
       <p className="text-lg font-semibold text-white">{hasLocation ? normalizedZip : "— — —"}</p>
     </div>
-    <div className="rounded-xl border border-white/10 bg-white/6 px-4 py-3">
+    <div className={`rounded-xl border border-white/10 bg-white/6 px-4 py-3 ${!hasLocation ? "opacity-55" : ""}`}>
       <p className="text-[0.7rem] uppercase tracking-[0.18em] text-slate-200/70">Status</p>
       <p className="text-lg font-semibold text-emerald-200">{hasLocation ? "Ready" : "Awaiting selection"}</p>
     </div>
@@ -127,7 +137,7 @@ function Evaluation({ location, predPrice }: EvaluationProps) {
           priceRatio={priceRatio}
         />
 
-        <div className="relative flex-1">
+        <div className={`relative flex-1 ${!hasLocation ? "opacity-40" : ""}`}>
           <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-24 bg-gradient-to-r from-[#050914]/65 to-transparent" />
           <div className="absolute left-6 top-6 z-20 inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/40 px-4 py-2 text-sm text-white backdrop-blur">
             <span className="h-2 w-2 rounded-full bg-sky-300 shadow-[0_0_10px_rgba(56,189,248,0.8)]" />
@@ -135,21 +145,22 @@ function Evaluation({ location, predPrice }: EvaluationProps) {
           </div>
           <div className="relative h-screen w-full overflow-hidden bg-slate-900/40">
             <ZipMap selectedZip={normalizedZip} />
-
-            {!hasLocation && (
-              <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-slate-950/60 backdrop-blur-sm">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-white shadow-lg shadow-slate-900/50">
-                  <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                    <path d="M12 21s7-5.5 7-11.5S16.627 2 12 2 5 5.5 5 9.5 12 21 12 21Z" />
-                    <circle cx="12" cy="9.5" r="2.5" />
-                  </svg>
-                </div>
-                <p className="text-lg font-medium text-white">Pick a ZIP to evaluate</p>
-                <p className="text-sm text-slate-200/80">We’ll center the map and surface local insights.</p>
-              </div>
-            )}
           </div>
         </div>
+
+        {!hasLocation && (
+          <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center bg-white/70">
+            <div className="flex flex-col items-center gap-4 text-center text-slate-800">
+              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-emerald-100 shadow-lg shadow-slate-900/20">
+                <svg className="h-14 w-14 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path d="M12 21s7-5.5 7-11.5S16.627 2 12 2 5 5.5 5 9.5 12 21 12 21Z" />
+                  <circle cx="12" cy="9.5" r="2.5" />
+                </svg>
+              </div>
+              <p className="text-2xl font-semibold text-slate-900">Select Location for Evaluation...</p>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
