@@ -215,8 +215,6 @@ export default function PriceForm({ location, setLocation, setPredPrice }: Price
 
           <div className="space-y-5">
             <div className="flex items-center gap-3 text-slate-100/75">
-              <span className="h-[2px] w-10 rounded-full bg-cyan-300/80" />
-              <span className="text-sm uppercase tracking-[0.28em]">Boston</span>
             </div>
             <h1 className="text-4xl font-extrabold leading-[1.02] tracking-tight sm:text-5xl lg:text-[4.8rem]">
               Boston&apos;s Residence Price Estimator
@@ -420,7 +418,7 @@ export default function PriceForm({ location, setLocation, setPredPrice }: Price
             <div className="md:col-span-2">
               <button
                 type="submit"
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-[#1f3bff] to-[#3a62ff] text-white font-semibold shadow-[0_4px_20px_rgba(0,0,0,0.3)] hover:shadow-[0_6px_25px_rgba(0,0,0,0.45)] hover:brightness-110 active:scale-[0.98] transition-all duration-300"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-[#4b2c23] via-[#8b3a2b] to-[#d45a2c] text-white font-semibold shadow-[0_6px_24px_rgba(76,44,35,0.4)] hover:shadow-[0_10px_32px_rgba(139,58,43,0.45)] hover:brightness-110 active:scale-[0.98] transition-all duration-300"
                 disabled={loading}
                 onClick={() => {
                   setTimeout(() => {

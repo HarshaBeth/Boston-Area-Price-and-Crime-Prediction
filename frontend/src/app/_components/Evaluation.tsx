@@ -29,7 +29,7 @@ const OverviewSidePanel = ({
   displayedPrice: number;
   priceRatio: number;
 }) => (
-  <aside className="relative z-10 w-full max-w-[460px] flex-shrink-0 overflow-y-auto border-r border-white/10 bg-white/5 px-10 py-12 backdrop-blur-xl">
+  <aside className="relative z-10 w-full max-w-[660px] flex-shrink-0 overflow-y-auto border-r border-white/10 bg-white/5 px-10 py-12 backdrop-blur-xl">
     <div className="space-y-8">
       <div className="space-y-2">
         <p className="text-xs uppercase tracking-[0.24em] text-slate-200/70">
@@ -60,12 +60,21 @@ const EstimatedPriceCard = ({
       </span>
       <span className="text-xs rounded-full bg-white/10 px-3 py-1 text-slate-100/80">AI prediction</span>
     </div>
-    <div className="text-4xl font-bold tracking-tight text-white">{formatCurrency(displayedPrice)}</div>
-    <div className="h-2 w-full rounded-full bg-white/10">
-      <div
-        className="h-2 rounded-full bg-gradient-to-r from-[#0e54ff] via-[#3b82f6] to-[#22d3ee] shadow-[0_0_20px_-6px_rgba(62,148,255,0.8)]"
-        style={{ width: `${Math.max(18, priceRatio * 100)}%` }}
-      />
+    <div className="flex items-end justify-between">
+      <div className="text-4xl font-bold tracking-tight text-white">{formatCurrency(displayedPrice)}</div>
+      <p className="text-xs text-slate-200/70">of $1.5M cap</p>
+    </div>
+    <div className="space-y-1">
+      <div className="h-2 w-full rounded-full bg-white/10">
+        <div
+          className="h-2 rounded-full bg-gradient-to-r from-[#0e54ff] via-[#3b82f6] to-[#22d3ee] shadow-[0_0_20px_-6px_rgba(62,148,255,0.8)]"
+          style={{ width: `${Math.max(8, priceRatio * 100)}%` }}
+        />
+      </div>
+      <div className="flex justify-between text-[0.68rem] text-slate-200/70">
+        <span>$0</span>
+        <span>$1.5M</span>
+      </div>
     </div>
     <p className="text-xs text-slate-200/70">Pricing blended from comparable Boston ZIP data and recent closings.</p>
   </div>
