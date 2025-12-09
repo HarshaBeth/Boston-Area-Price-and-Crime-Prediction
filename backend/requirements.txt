@@ -1,4 +1,3 @@
-annotated-doc==0.0.4
 annotated-types==0.7.0
 anyio==4.12.0
 appnope==0.1.4
@@ -35,6 +34,9 @@ networkx==3.5
 numpy==2.3.4
 packaging==25.0
 pandas==2.3.3
+geopandas
+shapely
+psycopg2-binary
 parso==0.8.5
 pexpect==4.9.0
 pillow==12.0.0
