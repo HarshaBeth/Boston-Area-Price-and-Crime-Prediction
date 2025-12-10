@@ -11,12 +11,11 @@ help:
 
 setup-all:
 	@echo "Building Docker images..."
-	@mkdir -p .docker-nocreds && echo '{"auths":{},"credsStore":""}' > .docker-nocreds/config.json
-	DOCKER_BUILDKIT=0 COMPOSE_DOCKER_CLI_BUILD=0 DOCKER_CONFIG=$(PWD)/.docker-nocreds docker-compose build
+	DOCKER_BUILDKIT=0 COMPOSE_DOCKER_CLI_BUILD=0 docker compose build
 	@echo "Starting database container..."
-	docker-compose up -d db
+	docker compose up -d db
 	@echo "Running ETL job to prepare crime data..."
-	docker-compose run --rm etl
+	docker compose run --rm etl
 	@echo "Initial setup complete. You can now run 'make start' to launch the full stack."
 
 start:
