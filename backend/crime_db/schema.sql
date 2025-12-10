@@ -1,6 +1,6 @@
-# Schema for crime aggregates used by the crime API.
-# Apply manually, e.g.:
-#   psql "$CRIME_DB_URL" -f backend/crime_db/schema.sql
+-- Schema for crime aggregates used by the crime API.
+-- Apply manually, e.g.:
+--   psql "$CRIME_DB_URL" -f backend/crime_db/schema.sql
 
 CREATE TABLE IF NOT EXISTS crime_monthly_zip (
     id SERIAL PRIMARY KEY,

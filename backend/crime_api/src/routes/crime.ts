@@ -54,7 +54,7 @@ router.get("/trend", async (req: Request, res: Response) => {
 
     let recentSum = 0;
     let previousSum = 0;
-    rows.forEach((r) => {
+    rows.forEach((r: { year: number; month: number; incident_count: number }) => {
       const idx = monthIndex(Number(r.year), Number(r.month));
       const count = Number(r.incident_count);
       if (idx >= recentCutoff && idx <= latestIdx) {
@@ -109,7 +109,7 @@ router.get("/offense-mix", async (req: Request, res: Response) => {
     const grouped: Record<number, { year: number; month: number; categories: Record<string, number> }> =
       {};
 
-    rows.forEach((r) => {
+    rows.forEach((r: { year: number; month: number; offense_category: string; incident_count: number }) => {
       const idx = monthIndex(Number(r.year), Number(r.month));
       if (idx < cutoffIdx) return;
       const key = idx;
@@ -167,17 +167,19 @@ router.get("/safety-context", async (req: Request, res: Response) => {
     );
 
     const populationMap = new Map<string, number>();
-    popResult.rows.forEach((r) => {
+    popResult.rows.forEach((r: { zip_code: string; population: number }) => {
       populationMap.set(r.zip_code, Number(r.population) || 0);
     });
 
     const totals = new Map<string, number>();
-    incidentsResult.rows.forEach((r) => {
-      const idx = monthIndex(Number(r.year), Number(r.month));
-      if (idx < cutoffIdx || idx > latestIdx) return;
-      const current = totals.get(r.zip_code) || 0;
-      totals.set(r.zip_code, current + Number(r.incident_count));
-    });
+    incidentsResult.rows.forEach(
+      (r: { zip_code: string; year: number; month: number; incident_count: number }) => {
+        const idx = monthIndex(Number(r.year), Number(r.month));
+        if (idx < cutoffIdx || idx > latestIdx) return;
+        const current = totals.get(r.zip_code) || 0;
+        totals.set(r.zip_code, current + Number(r.incident_count));
+      },
+    );
 
     const targetIncidents = totals.get(zip) || 0;
     const targetPop = populationMap.get(zip) || 0;
@@ -185,7 +187,7 @@ router.get("/safety-context", async (req: Request, res: Response) => {
 
     let cityIncidents = 0;
     let cityPopulation = 0;
-    totals.forEach((count, z) => {
+    totals.forEach((count: number, z: string) => {
       cityIncidents += count;
       cityPopulation += populationMap.get(z) || 0;
     });

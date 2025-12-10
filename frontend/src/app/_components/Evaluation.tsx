@@ -141,14 +141,14 @@ function Evaluation({ location, predPrice }: EvaluationProps) {
 
     let cancelled = false;
 
-    async function loadCrime() {
+    async function loadCrime(zip: string) {
       setCrimeLoading(true);
       setCrimeError(null);
       try {
         const [trend, mix, context] = await Promise.all([
-          getCrimeTrend(normalizedZip),
-          getOffenseMix(normalizedZip),
-          getSafetyContext(normalizedZip),
+          getCrimeTrend(zip),
+          getOffenseMix(zip),
+          getSafetyContext(zip),
         ]);
 
         if (cancelled) return;
@@ -171,7 +171,7 @@ function Evaluation({ location, predPrice }: EvaluationProps) {
       }
     }
 
-    loadCrime();
+    loadCrime(normalizedZip);
 
     return () => {
       cancelled = true;
