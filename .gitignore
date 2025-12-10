@@ -16,3 +16,6 @@ backend/datasets/
 
 # Jupyter
 *.ipynb_checkpoints
+.DS_Store
+backend/.DS_Store
+backend/datasets/.DS_Store
