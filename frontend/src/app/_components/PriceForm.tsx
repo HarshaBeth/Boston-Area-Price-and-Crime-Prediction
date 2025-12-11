@@ -21,10 +21,8 @@ type PriceFormProps = {
 
 export default function PriceForm({ location, setLocation, setPredPrice }: PriceFormProps) {
   // Try to match Landing location to a known ZIP, otherwise first option
-  debugger
   const initialZip =
     location && isZipString(location) ? Number(location) : ZIP_OPTIONS[0].value;
-    console.log("PriceForm initialZip:", initialZip);
 
   const [form, setForm] = useState<PriceRequest>({
     ZIPCODE: initialZip,
