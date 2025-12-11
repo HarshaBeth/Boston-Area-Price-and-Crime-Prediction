@@ -266,9 +266,8 @@ Before modeling, we quickly view the average pricing per zipcode to understand i
     "Random Forest": RandomForestRegressor(n_estimators=500, random_state=42),
     "Gradient Boosting": GradientBoostingRegressor(random_state=42)
       }
-```
-
-```xgb_model = XGBRegressor(
+ - ```
+   xgb_model = XGBRegressor(
     n_estimators=400,
     learning_rate=0.05,
     max_depth=8,
@@ -278,7 +277,8 @@ Before modeling, we quickly view the average pricing per zipcode to understand i
     n_jobs=-1
 )
 
-lgbm_model = LGBMRegressor(
+- ```
+  lgbm_model = LGBMRegressor(
     n_estimators=600,
     learning_rate=0.05,
     num_leaves=64,
@@ -296,13 +296,6 @@ lgbm_model = LGBMRegressor(
 
 
 
-
-## Roadmap
-- Add automated data refresh for crime CSV/JSON drops.
-- Expand crime endpoints with severity and time-of-day breakdowns.
-- Add caching for frequent ZIP lookups.
-- Ship CI for lint/test and contract checks for API schemas.
-- Publish a hosted demo with seeded artifacts.
 
 ## Contributing
 - Fork the repo, create a feature branch, and keep PRs focused.
