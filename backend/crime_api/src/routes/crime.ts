@@ -145,7 +145,10 @@ router.get("/safety-context", async (req: Request, res: Response) => {
 
   try {
     const latestResult = await query<{ year: number; month: number }>(
-      `SELECT MAX(year) AS year, MAX(month) AS month FROM crime_monthly_zip`,
+      `SELECT year, month
+       FROM crime_monthly_zip
+       ORDER BY year DESC, month DESC
+       LIMIT 1`,
     );
     const latestRow = latestResult.rows[0];
     if (!latestRow || latestRow.year === null || latestRow.month === null) {
@@ -168,48 +171,101 @@ router.get("/safety-context", async (req: Request, res: Response) => {
 
     const populationMap = new Map<string, number>();
     popResult.rows.forEach((r: { zip_code: string; population: number }) => {
-      populationMap.set(r.zip_code, Number(r.population) || 0);
+      const normalized = normalizeZip(r.zip_code);
+      if (!normalized) return;
+      const pop = Number(r.population);
+      if (Number.isFinite(pop) && pop > 0) {
+        populationMap.set(normalized, pop);
+      }
     });
+    if (!populationMap.size) {
+      console.warn("[crime_api] safety-context population table is empty");
+    }
+    if (!populationMap.has(zip)) {
+      console.warn(`[crime_api] safety-context missing population for target ZIP ${zip}`);
+    }
 
     const totals = new Map<string, number>();
     incidentsResult.rows.forEach(
       (r: { zip_code: string; year: number; month: number; incident_count: number }) => {
+        const normalized = normalizeZip(r.zip_code);
+        if (!normalized) return;
         const idx = monthIndex(Number(r.year), Number(r.month));
         if (idx < cutoffIdx || idx > latestIdx) return;
-        const current = totals.get(r.zip_code) || 0;
-        totals.set(r.zip_code, current + Number(r.incident_count));
+        const current = totals.get(normalized) || 0;
+        totals.set(normalized, current + Number(r.incident_count));
       },
     );
 
     const targetIncidents = totals.get(zip) || 0;
-    const targetPop = populationMap.get(zip) || 0;
-    const targetRate = targetPop > 0 ? (targetIncidents / targetPop) * 1000 : 0;
+    const targetPop = populationMap.get(zip);
+    const targetRate =
+      targetPop && targetPop > 0 ? Number(((targetIncidents / targetPop) * 1000).toFixed(2)) : null;
 
+    const cityEntries = Array.from(totals.entries()).filter(([z]) => populationMap.has(z));
     let cityIncidents = 0;
     let cityPopulation = 0;
-    totals.forEach((count: number, z: string) => {
+    cityEntries.forEach(([z, count]) => {
+      const pop = populationMap.get(z) || 0;
       cityIncidents += count;
-      cityPopulation += populationMap.get(z) || 0;
+      cityPopulation += pop;
     });
-    const cityRate = cityPopulation > 0 ? (cityIncidents / cityPopulation) * 1000 : 0;
+    const cityRate =
+      cityPopulation > 0 ? Number(((cityIncidents / cityPopulation) * 1000).toFixed(2)) : null;
 
-    const neighborCandidates = Array.from(totals.entries())
+    const neighborCandidates = cityEntries
       .filter(([z]) => z !== zip)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 2);
 
     const metrics = [
-      { label: "This ZIP", incidentsPer1000: Number(targetRate.toFixed(2)) },
-      { label: "City average", incidentsPer1000: Number(cityRate.toFixed(2)) },
+      {
+        label: "This ZIP",
+        incidentsPer1000: targetRate,
+        incidents: targetIncidents,
+        population: targetPop,
+        missingPopulation: !targetPop || targetPop <= 0,
+      },
+      {
+        label: "City average",
+        incidentsPer1000: cityRate,
+        incidents: cityIncidents,
+        population: cityPopulation,
+        contributingZips: cityEntries.length,
+        missingPopulation: cityPopulation <= 0,
+      },
       ...neighborCandidates.map(([z]) => {
         const pop = populationMap.get(z) || 0;
-        const rate = pop > 0 ? ((totals.get(z) || 0) / pop) * 1000 : 0;
+        const incidentTotal = totals.get(z) || 0;
+        const rate = pop > 0 ? Number(((incidentTotal / pop) * 1000).toFixed(2)) : null;
         return {
           label: `Neighbor ZIP ${z}`,
-          incidentsPer1000: Number(rate.toFixed(2)),
+          incidentsPer1000: rate,
+          incidents: incidentTotal,
+          population: pop,
+          missingPopulation: pop <= 0,
         };
       }),
     ];
+
+    console.info(
+      "[crime_api] safety-context target zip=%s incidents=%d pop=%s rate=%s",
+      zip,
+      targetIncidents,
+      targetPop ?? "missing",
+      targetRate ?? "n/a",
+    );
+    console.info(
+      "[crime_api] safety-context city incidents=%d pop=%d rate=%s contributors=%d",
+      cityIncidents,
+      cityPopulation,
+      cityRate ?? "n/a",
+      cityEntries.length,
+    );
+    console.info(
+      "[crime_api] safety-context neighbor zips=%s",
+      neighborCandidates.map(([z]) => z).join(",") || "none",
+    );
 
     return res.status(200).json({
       zip,

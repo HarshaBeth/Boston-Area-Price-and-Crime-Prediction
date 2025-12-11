@@ -64,7 +64,11 @@ export interface OffenseMixResponse {
 
 export interface CrimeSafetyMetric {
   label: string;
-  incidentsPer1000: number;
+  incidentsPer1000: number | null;
+  incidents?: number;
+  population?: number | null;
+  missingPopulation?: boolean;
+  contributingZips?: number;
 }
 
 export interface SafetyContextResponse {

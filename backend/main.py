@@ -42,6 +42,11 @@ def get_artifacts():
         model = joblib.load(model_path, mmap_mode="r")
         scaler = joblib.load(scaler_path)
         numeric_cols = list(joblib.load(cols_path))
+
+        # Force single-threaded predictions to keep memory/CPU bounded in-container.
+        if hasattr(model, "n_jobs"):
+            logger.info("Setting model.n_jobs = 1 (was %r)", getattr(model, "n_jobs", None))
+            model.n_jobs = 1
     except Exception as exc:
         logger.exception("Failed to load price model artifacts")
         raise RuntimeError(f"Failed to load model artifacts: {exc}") from exc
