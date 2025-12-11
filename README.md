@@ -258,7 +258,8 @@ Before modeling, we quickly view the average pricing per zipcode to understand i
 
   ### Modeling the price prediction model:
   - Initially we tested a linear regression model with polynomial curve fitting. Next, we trained multiple models to ensure we find the best results.
-  - ```
+  
+  ```
     models = {
     "Linear Regression": LinearRegression(),
     "Ridge": Ridge(alpha=1.0),
@@ -266,7 +267,8 @@ Before modeling, we quickly view the average pricing per zipcode to understand i
     "Random Forest": RandomForestRegressor(n_estimators=500, random_state=42),
     "Gradient Boosting": GradientBoostingRegressor(random_state=42)
       }
- - ```
+  ```
+  ```
    xgb_model = XGBRegressor(
     n_estimators=400,
     learning_rate=0.05,
@@ -274,18 +276,19 @@ Before modeling, we quickly view the average pricing per zipcode to understand i
     subsample=0.8,
     colsample_bytree=0.8,
     objective="reg:squarederror",
-    n_jobs=-1
-)
+    n_jobs=-1)
 
-- ```
+```
   lgbm_model = LGBMRegressor(
     n_estimators=600,
     learning_rate=0.05,
     num_leaves=64,
     subsample=0.8,
-    colsample_bytree=0.8
-)
+    colsample_bytree=0.8)
 ```
+
+
+
 - Next, we chose the evaluation metrics to be RMSE and R-squared. 
 
 
