@@ -3,6 +3,14 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { predictPrice, PriceRequest } from "@/lib/api";
+import {
+  ZIP_STRINGS,
+  ZIP_OPTIONS,
+  AC_OPTIONS,
+  HEAT_OPTIONS,
+  KITCHEN_OPTIONS,
+  isZipString,
+} from "@/lib/priceFormOptions";
 import LandingImage from "../../../public/background_housing2.jpg";
 
 type PriceFormProps = {
@@ -11,85 +19,10 @@ type PriceFormProps = {
   setPredPrice: (price: number | null) => void;
 };
 
-// Allowed ZIP codes as strings
-const ZIP_STRINGS = [
-  "02026",
-  "02108",
-  "02109",
-  "02110",
-  "02111",
-  "02113",
-  "02114",
-  "02115",
-  "02116",
-  "02118",
-  "02119",
-  "02120",
-  "02121",
-  "02122",
-  "02124",
-  "02125",
-  "02126",
-  "02127",
-  "02128",
-  "02129",
-  "02130",
-  "02131",
-  "02132",
-  "02134",
-  "02135",
-  "02136",
-  "02199",
-  "02210",
-  "02215",
-  "02445",
-  "02446",
-  "02458",
-  "02467",
-];
-
-// Map to label + numeric value (model expects int like 2134, 2026, etc.)
-const ZIP_OPTIONS = ZIP_STRINGS.map((z) => ({
-  label: z,
-  value: Number(z),
-}));
-
-// AC encoding/decoding:
-const AC_OPTIONS = [
-  { label: "None", value: -1 },
-  { label: "Central AC", value: 2 },
-  { label: "Ductless AC", value: 1 },
-  { label: "Yes (Other)", value: 0 },
-];
-
-// Heat encoding/decoding:
-const HEAT_OPTIONS = [
-  { label: "Hot Water / Steam", value: -2 },
-  { label: "Forced Hot Air", value: 1 },
-  { label: "Space Heat", value: -1 },
-  { label: "Electric", value: -3 },
-  { label: "None", value: 0 },
-  { label: "Heat Pump", value: 2 },
-  { label: "Other", value: 3 },
-];
-
-const KITCHEN_OPTIONS = [
-  { label: "One Person Kitchen", value: 0 },
-  { label: "1 Full Eat-In Kitchen", value: 1 },
-  { label: "Full Eat-In Kitchen", value: 1 },
-  { label: "2 Full Eat-In Kitchens", value: 2 },
-  { label: "3 Full Eat-In Kitchens", value: 3 },
-  { label: "0 Full Eat-In Kitchens (Kitchenette)", value: -1 },
-  { label: "Pullman Kitchen (Narrow/Galley)", value: -2 },
-  { label: "No Kitchen", value: -3 },
-  { label: "4 Full Eat-In Kitchens", value: 4 },
-  { label: "5 Full Eat-In Kitchens", value: 5 },
-];
-
 export default function PriceForm({ location, setLocation, setPredPrice }: PriceFormProps) {
   // Try to match Landing location to a known ZIP, otherwise first option
   const initialZip =
-    location && ZIP_STRINGS.includes(location) ? Number(location) : ZIP_OPTIONS[0].value;
+    location && isZipString(location) ? Number(location) : ZIP_OPTIONS[0].value;
 
   const [form, setForm] = useState<PriceRequest>({
     ZIPCODE: initialZip,
@@ -106,6 +39,8 @@ export default function PriceForm({ location, setLocation, setPredPrice }: Price
     AC_TYPE: -1,
   });
 
+  console.log("PriceForm:", form);
+
   const [, setPrediction] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -117,7 +52,7 @@ export default function PriceForm({ location, setLocation, setPredPrice }: Price
 
   // If location (ZIP) from Landing becomes one of the valid ZIPs, update form
   useEffect(() => {
-    if (location && ZIP_STRINGS.includes(location)) {
+    if (location && isZipString(location)) {
       setForm((prev) => ({ ...prev, ZIPCODE: Number(location) }));
     }
   }, [location]);
@@ -177,7 +112,8 @@ export default function PriceForm({ location, setLocation, setPredPrice }: Price
     setLoading(true);
     setError(null);
     setPrediction(null);
-    setLocation(form.ZIPCODE.toString());
+    const normalizedZip = String(form.ZIPCODE).padStart(5, "0");
+    setLocation(normalizedZip);
 
     try {
       const res = await predictPrice(form);
@@ -235,7 +171,7 @@ export default function PriceForm({ location, setLocation, setPredPrice }: Price
 
         <form
           onSubmit={handleSubmit}
-          className="flex-1 w-full max-w-4xl lg:max-w-5xl translate-y-4 rounded-[32px] border border-white/20 bg-white/12 p-10 shadow-[0_35px_140px_-60px_rgba(6,10,25,0.9)] backdrop-blur-2xl transition"
+          className="flex-1 w-full max-w-4xl lg:max-w-5xl translate-y-4 rounded-[32px] border border-white/20 bg-white/12 p-10 shadow-none hover:shadow-none focus-within:shadow-none backdrop-blur-2xl transition-shadow"
         >
           <div className="mb-8 flex items-center justify-between">
             <div>

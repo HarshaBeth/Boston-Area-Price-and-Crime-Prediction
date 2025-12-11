@@ -14,5 +14,11 @@ backend/datasets/
 # Large models
 *.pkl
 
+# Allow committed crime population seed
+!backend/artifacts/crime/crime_zip_population.csv
+
 # Jupyter
 *.ipynb_checkpoints
+.DS_Store
+backend/.DS_Store
+backend/datasets/.DS_Store

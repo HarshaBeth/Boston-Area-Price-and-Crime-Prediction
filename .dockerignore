@@ -1,0 +1,7 @@
+.git
+.gitignore
+.git-lfs
+.conda
+node_modules
+npm-debug.log
+.DS_Store

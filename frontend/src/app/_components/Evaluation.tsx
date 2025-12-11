@@ -1,7 +1,18 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import ZipMap from "./ZipMap";
+import {
+  getCrimeTrend,
+  getOffenseMix,
+  getSafetyContext,
+  type CrimeTrendResponse,
+  type OffenseMixResponse,
+  type SafetyContextResponse,
+} from "@/lib/api";
+import { CrimeTrendChart } from "./CrimeTrendChart";
+import { OffenseMixChart } from "./OffenseMixChart";
+import { SafetyContextChart } from "./SafetyContextChart";
 
 type EvaluationProps = {
   location?: string;
@@ -72,7 +83,7 @@ const EstimatedPriceCard = ({
     </div>
     <div className="flex items-end justify-between">
       <div className="text-4xl font-bold tracking-tight text-white">{formatCurrency(displayedPrice)}</div>
-      <p className="text-xs text-slate-200/70">of $1.5M cap</p>
+      <p className="text-xs text-slate-200/70">of $3M cap</p>
     </div>
     <div className="space-y-1">
       <div className="h-2 w-full rounded-full bg-white/10">
@@ -83,7 +94,7 @@ const EstimatedPriceCard = ({
       </div>
       <div className="flex justify-between text-[0.68rem] text-slate-200/70">
         <span>$0</span>
-        <span>$1.5M</span>
+        <span>$3M</span>
       </div>
     </div>
     <p className="text-xs text-slate-200/70">Pricing blended from comparable Boston ZIP data and recent closings.</p>
@@ -111,6 +122,61 @@ const ZipAndStatusCard = ({
 
 function Evaluation({ location, predPrice }: EvaluationProps) {
   const normalizedZip = location && location.trim() !== "" ? location.trim().padStart(5, "0") : null;
+
+  const [crimeTrend, setCrimeTrend] = useState<CrimeTrendResponse | null>(null);
+  const [offenseMix, setOffenseMix] = useState<OffenseMixResponse | null>(null);
+  const [safetyContext, setSafetyContext] = useState<SafetyContextResponse | null>(null);
+  const [crimeLoading, setCrimeLoading] = useState(false);
+  const [crimeError, setCrimeError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!normalizedZip) {
+      setCrimeTrend(null);
+      setOffenseMix(null);
+      setSafetyContext(null);
+      setCrimeError(null);
+      setCrimeLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadCrime(zip: string) {
+      setCrimeLoading(true);
+      setCrimeError(null);
+      try {
+        const [trend, mix, context] = await Promise.all([
+          getCrimeTrend(zip),
+          getOffenseMix(zip),
+          getSafetyContext(zip),
+        ]);
+
+        if (cancelled) return;
+
+        setCrimeTrend(trend);
+        setOffenseMix(mix);
+        setSafetyContext(context);
+      } catch (err) {
+        console.error("Error loading crime data", err);
+        if (!cancelled) {
+          setCrimeError("Crime data unavailable for this ZIP.");
+          setCrimeTrend(null);
+          setOffenseMix(null);
+          setSafetyContext(null);
+        }
+      } finally {
+        if (!cancelled) {
+          setCrimeLoading(false);
+        }
+      }
+    }
+
+    loadCrime(normalizedZip);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [normalizedZip]);
 
   const hasLocation = Boolean(normalizedZip);
   const displayedPrice = useMemo(() => {
@@ -162,6 +228,24 @@ function Evaluation({ location, predPrice }: EvaluationProps) {
           </div>
         )}
       </div>
+
+      {normalizedZip && (
+        <section className="mx-auto max-w-6xl px-6 py-12 space-y-4">
+          <h2 className="text-xl font-semibold text-white">Crime &amp; Safety</h2>
+
+          {crimeLoading && <p className="text-sm text-gray-300">Loading crime data…</p>}
+
+          {crimeError && <p className="text-sm text-red-400">{crimeError}</p>}
+
+          {!crimeLoading && !crimeError && (
+            <div className="space-y-6">
+              {crimeTrend && <CrimeTrendChart data={crimeTrend} />}
+              {offenseMix && <OffenseMixChart data={offenseMix} />}
+              {safetyContext && <SafetyContextChart data={safetyContext} />}
+            </div>
+          )}
+        </section>
+      )}
     </section>
   );
 }

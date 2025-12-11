@@ -9,6 +9,41 @@ Final Project YouTube Video: https://youtu.be/ZwULz597bu4
 ## Overview
 <p align="justify"> Boston, MA, is a lively city with roughly 45 million people entering the city every year. This includes tourists, new residents, students, and others. Given the rising population of Boston, it is imperative to have a secure system for newcomers to understand the city better. This project aims to assist people learn crucial information about their potential residency, based on factors like crime rate and housing rent.</p>
 
+## 🚀 Quickstart (Docker + Makefile, recommended)
+
+### Prerequisites
+- Docker Desktop (or Docker Engine) installed and running — download at https://www.docker.com/products/docker-desktop/
+- `make` available on your system (macOS/Linux ship it; on Windows use WSL or Git Bash; GNU Make info: https://www.gnu.org/software/make/)
+
+### First-time setup on a new machine
+```bash
+git clone <repo-url>
+cd Boston-Area-Price-and-Crime-Prediction
+
+make setup-all
+```
+What `make setup-all` does:
+- Builds Docker images for the database, ETL, price API, crime API, and frontend
+- Starts PostgreSQL and runs the ETL container to apply schema + load crime aggregates
+
+### Starting the app
+```bash
+make start
+```
+This starts Postgres, the price API (FastAPI on port 8000), the crime API (Express on port 4000), and the frontend (Next.js on port 3000). Open http://localhost:3000 in your browser.
+
+### Stopping the app
+```bash
+make stop
+```
+Stops all containers but keeps the database volume and data.
+
+### Reset everything (optional)
+```bash
+make clean
+```
+Stops containers and removes volumes (wipes the DB). Run `make setup-all` again to rebuild and reload data.
+
 ## Setup Installation
 
 If you don't have make installed, do the following.
@@ -87,6 +122,53 @@ make help
 - https://data.boston.gov/dataset/crime-incident-reports-august-2015-to-date-source-new-system
 - https://data.boston.gov/dataset/property-assessment
 
+### Modeling the project
+
+1. Price prediction is a regression task; for crime we rely on descriptive aggregates and visualizations rather than predictive safety scores.
+2. Price models will be tested on our dataset to get the most suitable model.
+
+### Data Visualization
+
+1. Time-series plot, understanding the crime rate over time
+2. Time-of-day heatmap, helps understand which hours are safe/risky
+3. Weekly crime bar plot (Monday-Sunday)
+4. Correlation with time and crime type
+5. Crime type frequencies
+6. Scatter plot exploring features vs the house value
+7. Analyze the influence of a house value being near the Charles River
+8. Box plots for each feature to check for outliers and skewed data
+9. Comparing house values based on different locations
+
+### Test Plan
+
+<p align="justify">The project is built on an aggregation of the Boston Crime Dataset and the Boston Housing Dataset. These are detailed datasets up until 2025 that are effective in providing realistic predictions. The datasets will be divided into training and testing sets, 80% and 20% respectively.</p>
+
+
+
+# Crime and Housing Price Data Analysis
+
+Link to YT explanation: https://youtu.be/Ly8c4S4XE5I
+
+This project combines multiple years of crime records in Boston with housing price datasets. We perform preprocessing to clean the data and generate visualizations to better understand trends, distributions, and relationships.
+
+🔍 **Crime & Safety panel (historical visualization, not predictive)**
+- Uses past Boston crime data to compute and visualize:
+  - 5-year monthly crime trend for the selected ZIP
+  - Offense mix over the last 12 months (e.g., property vs. violent vs. other)
+  - A “safety context” comparing the selected ZIP’s incidents-per-1,000 residents over the last 12 months to the city average and a couple of other high-incident ZIPs
+- Charts are descriptive only; they are based purely on historical records and are intended as informational visualizations, not risk ratings or guarantees.
+
+---
+
+## Data Preprocessing
+
+### Crime Data
+- We merged datasets from 2015–2023, resulting in **~875,000 rows**.
+- Null values were present in important columns (`OFFENSE_CODE_GROUP`, `UCR_PART`, `DISTRICT`, `STREET`) and were dropped to ensure consistency.
+- Created two subsets:  
+  - **`predict_offense_df`**: Used for crime type, district, and street analysis.  
+  - **`predict_offense_time_df`**: Used for time-based crime analysis (hour of day, district, street).
+- After cleaning, the datasets were reduced to manageable, non-null records.
 
 ### Housing Price Data
 - We combined 10 fiscal year datasets (2015–2025) with **~1.5M rows** and **139 columns**.
@@ -151,7 +233,7 @@ make help
 
 - **Crime Data**: Clear temporal and spatial patterns observed. Crimes peak in the summer and evenings. Certain districts consistently have higher counts.  
 - **Housing Price Data**: Strong regional variation in property values. Certain features (`ZIPCODE`, `LU`, `BED_RMS`, `FULL_BTH`) show potential predictive power.  
-- **Next Steps**: Model building can leverage these cleaned datasets, focusing on time, location, and property attributes to predict outcomes (crime likelihood or property prices).
+- **Next Steps**: Model building focuses on property price prediction; crime visualizations remain descriptive summaries of historical records.
 
 
 ## Architecture
@@ -353,3 +435,27 @@ For serving price predictions through the FastAPI backend, we use a **RandomFore
 - Boston property assessments: data.boston.gov.
 - Leaflet/OpenStreetMap for mapping tiles and GeoJSON rendering.
 - Contributors and the Boston open data community.
+
+## 🛠️ Advanced: Manual local dev (without Docker)
+
+Note: This path is mainly for contributors who want to run everything directly on their machine. For most users, the Docker + Makefile quickstart above is recommended.
+
+1. Backend (price API & scripts)
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate
+   pip install -r backend/requirements.txt
+   uvicorn backend.main:app --host 0.0.0.0 --port 8000
+   ```
+2. Frontend
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+3. Crime ETL (requires GeoPandas deps)
+   ```bash
+   source .venv/bin/activate
+   python backend/scripts/prepare_crime_data.py
+   CRIME_DB_URL=postgresql://user:pass@localhost:5432/boston_crime python backend/scripts/load_crime_to_postgres.py
+   ```
