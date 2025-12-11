@@ -83,7 +83,7 @@ const EstimatedPriceCard = ({
     </div>
     <div className="flex items-end justify-between">
       <div className="text-4xl font-bold tracking-tight text-white">{formatCurrency(displayedPrice)}</div>
-      <p className="text-xs text-slate-200/70">of $1.5M cap</p>
+      <p className="text-xs text-slate-200/70">of $3M cap</p>
     </div>
     <div className="space-y-1">
       <div className="h-2 w-full rounded-full bg-white/10">
@@ -94,7 +94,7 @@ const EstimatedPriceCard = ({
       </div>
       <div className="flex justify-between text-[0.68rem] text-slate-200/70">
         <span>$0</span>
-        <span>$1.5M</span>
+        <span>$3M</span>
       </div>
     </div>
     <p className="text-xs text-slate-200/70">Pricing blended from comparable Boston ZIP data and recent closings.</p>
