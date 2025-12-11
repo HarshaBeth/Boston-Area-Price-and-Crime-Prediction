@@ -240,7 +240,7 @@ Open `http://localhost:3000` and the app will call the APIs via the URLs set in 
 Before modeling, we quickly view the average pricing per zipcode to understand if our model performs accordingly.
 <img width="1004" height="426" alt="Screenshot 2025-12-11 at 1 13 59 AM" src="https://github.com/user-attachments/assets/28c97dbd-c6e8-4d77-8d11-0e13aee4e4bc" />
 
-###Crime data visualizations:
+### Crime data visualizations:
 <img width="1016" height="497" alt="Screenshot 2025-12-11 at 1 15 07 AM" src="https://github.com/user-attachments/assets/8c7aa939-1323-4af7-8159-d2c6688c573f" />
 <img width="977" height="548" alt="Screenshot 2025-12-11 at 1 15 42 AM" src="https://github.com/user-attachments/assets/440bbb94-d0b7-4634-99f0-fe07dfce0d87" />
 <img width="1015" height="547" alt="Screenshot 2025-12-11 at 1 15 55 AM" src="https://github.com/user-attachments/assets/ad4731da-00fa-461e-a07d-ec61a3e74606" />
@@ -286,7 +286,14 @@ lgbm_model = LGBMRegressor(
     colsample_bytree=0.8
 )
 ```
-- Next, we chose the evaluation metrics to be RMSE and R squared. We got the highest R squared score from the Random Forest Regressor, 0.97. This means the model was able to capture 97% of variance in the data.
+- Next, we chose the evaluation metrics to be RMSE and R-squared. 
+
+
+## Results
+- We got the highest R-squared score from the Random Forest Regressor, 0.97. This means the model was able to capture 97% of the variance in the data.
+- Below is a plot that shows the actual versus predicted value:
+<img width="584" height="582" alt="Screenshot 2025-12-11 at 1 26 50 AM" src="https://github.com/user-attachments/assets/85963736-85e7-4120-9c3d-7bcfa0cb7a34" />
+
 
 
 
