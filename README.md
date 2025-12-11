@@ -1,18 +1,19 @@
-# Boston Neighborhood Price and Crime Prediction
+Read me
+Final Project YouTube Video: https://youtu.be/ZwULz597bu4
 
-## Description
+# Boston Housing & Crime Insights
+> Next.js dashboards powered by FastAPI microservices for AI home valuations and neighborhood safety signals.
 
+![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js) ![React](https://img.shields.io/badge/React-19-149eca?logo=react) ![FastAPI](https://img.shields.io/badge/FastAPI-Python-009688?logo=fastapi) ![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript) ![Status](https://img.shields.io/badge/status-active-success) ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
+
+## Overview
 <p align="justify"> Boston, MA, is a lively city with roughly 45 million people entering the city every year. This includes tourists, new residents, students, and others. Given the rising population of Boston, it is imperative to have a secure system for newcomers to understand the city better. This project aims to assist people learn crucial information about their potential residency, based on factors like crime rate and housing rent.</p>
 
-## Proposal
-
-### Clear Goals
-
-1. Enabling a search-based system that displays intended information based on the neighborhood
-2. Building a UI for this search-based system
-3. Predict the crime rate and type of crime based on the searched neighborhood
-4. Predict the overall rent in the neighborhood based on house features and crime rate
-5. Providing users valuable information on residencies to be able to make evaluated decisions
+## Features
+- ZIP-focused search that evaluate pricing.
+- FastAPI price service that loads a serialized ML model for instant home valuations.
+- Interactive Next.js UI with charts, Leaflet maps, and responsive components.
+- Local-first development: run everything with Node and Python, no containers required.
 
 ### Data Collection
 
@@ -24,46 +25,6 @@
 - https://data.boston.gov/dataset/crime-incident-reports-august-2015-to-date-source-new-system
 - https://data.boston.gov/dataset/property-assessment
 
-### Modeling the project
-
-1. Price prediction and crime prediction are regression tasks, hence, we will implement Linear or Polynomial Regression, Logistic Regression, and Random Forest Regression.
-2. These models will be tested on our dataset to get the most suitable model.
-
-### Data Visualization
-
-1. Time-series plot, understanding the crime rate over time
-2. Time-of-day heatmap, helps understand which hours are safe/risky
-3. Weekly crime bar plot (Monday-Sunday)
-4. Correlation with time and crime type
-5. Crime type frequencies
-6. Scatter plot exploring features vs the house value
-7. Analyze the influence of a house value being near the Charles River
-8. Box plots for each feature to check for outliers and skewed data
-9. Comparing house values based on different locations
-
-### Test Plan
-
-<p align="justify">The project is built on an aggregation of the Boston Crime Dataset and the Boston Housing Dataset. These are detailed datasets up until 2025 that are effective in providing realistic predictions. The datasets will be divided into training and testing sets, 80% and 20% respectively.</p>
-
-
-
-# Crime and Housing Price Data Analysis
-
-Link to YT explanation: https://youtu.be/Ly8c4S4XE5I
-
-This project combines multiple years of crime records in Boston with housing price datasets. We perform preprocessing to clean the data and generate visualizations to better understand trends, distributions, and relationships.
-
----
-
-## Data Preprocessing
-
-### Crime Data
-- We merged datasets from 2015–2023, resulting in **~875,000 rows**.
-- Null values were present in important columns (`OFFENSE_CODE_GROUP`, `UCR_PART`, `DISTRICT`, `STREET`) and were dropped to ensure consistency.
-- Created two subsets:  
-  - **`predict_offense_df`**: Used for crime type, district, and street analysis.  
-  - **`predict_offense_time_df`**: Used for time-based crime analysis (hour of day, district, street).
-- After cleaning, the datasets were reduced to manageable, non-null records.
 
 ### Housing Price Data
 - We combined 10 fiscal year datasets (2015–2025) with **~1.5M rows** and **139 columns**.
@@ -130,9 +91,103 @@ This project combines multiple years of crime records in Boston with housing pri
 - **Housing Price Data**: Strong regional variation in property values. Certain features (`ZIPCODE`, `LU`, `BED_RMS`, `FULL_BTH`) show potential predictive power.  
 - **Next Steps**: Model building can leverage these cleaned datasets, focusing on time, location, and property attributes to predict outcomes (crime likelihood or property prices).
 
----
 
-## Notes
-- Anomalies like spikes in crime counts (June/July 2025) need to be excluded from modeling to avoid misleading results.  
-- Categories like `"Other"` in crime types or extreme rare counts in housing data were excluded to improve model performance.  
-- Visualizations provide a solid understanding of trends before applying machine learning models.
+## Architecture
+```
+  User[Browser] --> Frontend[Next.js 15]
+  Frontend -->|REST| PriceAPI[FastAPI Price API :8000]
+  PriceAPI -->|load| Model[Trained Price Model (joblib/pkl)]
+```
+
+
+
+## Technology Stack
+| Layer | Tech |
+| --- | --- |
+| Frontend | Next.js 15, React 19, TypeScript, Leaflet/react-leaflet |
+| Price API | FastAPI, Python 3.11+, joblib/scikit-learn artifacts |
+| Tooling | npm, pip/venv, ESLint, Turbopack dev server |
+
+## Folder Structure
+```text
+.
+├── frontend/          # Next.js app (charts, maps, UI)
+├── price-api/         # FastAPI service for price prediction (model artifacts)
+└── README.md
+```
+
+## Local Development
+### Prerequisites
+- Node.js 20+ and npm
+- Python 3.11+ with `pip` and `venv`
+
+### 1) Clone
+```bash
+git clone https://github.com/HarshaBeth/Boston-Area-Price-and-Crime-Prediction.git
+cd Boston-Area-Price-and-Crime-Prediction
+```
+
+### 2) Environment Variables
+- Frontend (`frontend/.env.local`):
+  ```env
+  NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+  ```
+
+### 3) Install & Run Services
+- **Price API (FastAPI)**
+  ```bash
+  cd price-api
+  python -m venv .venv
+  source .venv/bin/activate
+  pip install -r requirements.txt
+  uvicorn main:app --reload --port 8000
+  ```
+
+- **Frontend (Next.js)**
+  ```bash
+  cd frontend
+  npm install
+  npm run dev
+  ```
+Open `http://localhost:3000` and the app will call the APIs via the URLs set in `.env.local`.
+
+
+
+## Sample JSON Responses
+```json
+// Price prediction
+{ "predicted_price": 912345.55 }
+
+```
+
+## Screenshots / UI Preview
+Add your captures to `frontend/public/` and reference them here:
+- `frontend/public/average_value_zipcode.png`
+- `frontend/public/model_eval.png`
+- `frontend/public/search.png`
+
+## Common Errors & Fixes
+- **Port already in use**: change `PORT` in `.env` or stop the conflicting process.
+- **Model file not found**: verify `MODEL_PATH`, `SCALER_PATH`, and `NUMERIC_COLS_PATH` point to actual artifacts.
+- **Dataset path invalid**: ensure `CRIME_DATA_DIR` contains the expected CSV/JSON files.
+- **CORS blocked**: update `CORS_ALLOW_ORIGINS` in API env files to include your frontend origin.
+- **Env not loaded**: restart servers after editing `.env` files.
+
+## Roadmap
+- Add automated data refresh for crime CSV/JSON drops.
+- Expand crime endpoints with severity and time-of-day breakdowns.
+- Add caching for frequent ZIP lookups.
+- Ship CI for lint/test and contract checks for API schemas.
+- Publish a hosted demo with seeded artifacts.
+
+## Contributing
+- Fork the repo, create a feature branch, and keep PRs focused.
+- Add/adjust tests or sample responses when changing endpoints.
+- Run formatters/lint: `npm run lint` (frontend) and your preferred Python formatter (e.g., `ruff`/`black`) for APIs.
+- Include a brief summary and screenshots for UI changes in your PR.
+
+## Credits & Acknowledgements
+- Boston crime data: Analyze Boston (public datasets).
+- Boston property assessments: data.boston.gov.
+- Leaflet/OpenStreetMap for mapping tiles and GeoJSON rendering.
+- Contributors and the Boston open data community.
