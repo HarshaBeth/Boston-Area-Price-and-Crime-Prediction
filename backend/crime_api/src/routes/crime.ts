@@ -3,6 +3,7 @@ import { query } from "../db";
 
 const router = Router();
 export default router;
+const DEBUG = process.env.CRIME_API_DEBUG === "1";
 
 function normalizeZip(zipParam?: string | string[]): string | null {
   if (!zipParam || Array.isArray(zipParam)) return null;
@@ -72,9 +73,13 @@ router.get("/trend", async (req: Request, res: Response) => {
       points,
       yearOverYearChangePercent: yoy,
     });
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error in /api/crime/trend", err);
-    return res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({
+      error: "Internal server error",
+      detail: DEBUG ? String(err?.message ?? err) : undefined,
+      stack: DEBUG ? err?.stack : undefined,
+    });
   }
 });
 
@@ -131,9 +136,13 @@ router.get("/offense-mix", async (req: Request, res: Response) => {
       zip,
       months,
     });
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error in /api/crime/offense-mix", err);
-    return res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({
+      error: "Internal server error",
+      detail: DEBUG ? String(err?.message ?? err) : undefined,
+      stack: DEBUG ? err?.stack : undefined,
+    });
   }
 });
 
@@ -271,9 +280,13 @@ router.get("/safety-context", async (req: Request, res: Response) => {
       zip,
       metrics,
     });
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error in /api/crime/safety-context", err);
-    return res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({
+      error: "Internal server error",
+      detail: DEBUG ? String(err?.message ?? err) : undefined,
+      stack: DEBUG ? err?.stack : undefined,
+    });
   }
 });
 

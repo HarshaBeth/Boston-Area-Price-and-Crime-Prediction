@@ -74,7 +74,7 @@ export function SafetyContextChart({ data }: SafetyContextChartProps) {
               <LabelList
                 dataKey="displayValue"
                 position="top"
-                formatter={(val: string, _1, props: any) =>
+                formatter={(val: string, _name: string | number, props: any) =>
                   props?.payload?.missingPopulation ? "N/A" : val
                 }
               />

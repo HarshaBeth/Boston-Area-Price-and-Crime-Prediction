@@ -112,7 +112,8 @@ export default function PriceForm({ location, setLocation, setPredPrice }: Price
     setLoading(true);
     setError(null);
     setPrediction(null);
-    setLocation(form.ZIPCODE.toString());
+    const normalizedZip = String(form.ZIPCODE).padStart(5, "0");
+    setLocation(normalizedZip);
 
     try {
       const res = await predictPrice(form);
