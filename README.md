@@ -289,7 +289,10 @@ Before modeling, we quickly view the average pricing per zipcode to understand i
 
 
 
-- Next, we chose the evaluation metrics to be RMSE and R-squared. 
+- Next, we chose the evaluation metrics to be RMSE and R-squared.
+
+### Crime data model
+- As mentioned in the youtube video, the dataset for crime did not match well enough with the price dataset. The primary keys were mismatched, crime dataset uses 'district' and price dataset uses 'zipcode'. Therefore, we haven't modeled the crime dataset; however, we have explored the dataset thoroughly enough to give anyone who looks at the repo a detailed understanding of the crime dataset per district.
 
 
 ## Results
