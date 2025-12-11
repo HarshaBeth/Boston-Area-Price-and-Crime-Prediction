@@ -205,6 +205,23 @@ cd Boston-Area-Price-and-Crime-Prediction
   uvicorn main:app --reload --port 8000
   ```
 
+  You need to download the pretrained artifacts from the shared drive and place them in `backend/notebooks/`:
+  - Drive folder: https://drive.google.com/drive/folders/1xpvKWYU9cxUxsiZlxglOHkv2lfV5RI2h?usp=sharing  
+  - Required files:
+    - `best_price_model.pkl`
+    - `scaler_price_features.pkl`
+    - `scaler_numeric_columns.pkl`
+
+  Your layout should look like:
+  ```text
+  backend/
+    notebooks/
+      best_price_model.pkl
+      scaler_price_features.pkl
+      scaler_numeric_columns.pkl
+      ... (notebooks, etc.)
+  ```
+
 - **Frontend (Next.js)**
   ```bash
   cd frontend
@@ -290,6 +307,28 @@ Before modeling, we quickly view the average pricing per zipcode to understand i
 
 
 - Next, we chose the evaluation metrics to be RMSE and R-squared.
+
+### RandomForestRegressor price model (deployed)
+
+For serving price predictions through the FastAPI backend, we use a **RandomForestRegressor** model from scikit-learn.
+
+- **What it is**  
+  Random Forest is an ensemble method: instead of a single decision tree, it trains many trees on slightly different samples of the data and **averages their predictions**. Each tree is a weak learner, but together they form a strong, robust model that generalizes well.
+
+- **What it uses in this project**  
+  The deployed RandomForestRegressor is trained on cleaned and engineered Boston property data. Input features include:
+  - Location and size: `ZIPCODE`, `GROSS_AREA`, `LIVING_AREA`
+  - Rooms and structure: `BED_RMS`, `FULL_BTH`, `HLF_BTH`, `NUM_PARKING`, `KITCHENS`, `FIREPLACES`
+  - Encoded property characteristics such as `KITCHEN_TYPE`, `HEAT_TYPE`, `AC_TYPE`
+  Before training, numeric features are **scaled** so that the model sees normalized values instead of raw magnitudes.
+
+- **How it predicts a price**  
+  1. During training, each tree learns a set of if–then splits (e.g., “if LIVING_AREA > X and ZIPCODE in Y, predict around Z dollars”) on a bootstrap sample of the data and a random subset of features at each split.  
+  2. At inference time, a new property goes down every tree; each tree outputs its own price estimate.  
+  3. The forest takes the **average of all tree outputs** as the final predicted price that is returned by the API.
+
+- **Why we kept RandomForestRegressor**  
+  In our experiments, RandomForestRegressor achieved the best R-squared score (~0.97) compared to linear models and gradient-boosted variants. It handles non-linear relationships, feature interactions, and outliers well, which fits this tabular housing dataset.
 
 ### Crime data model
 - As mentioned in the youtube video, the dataset for crime did not match well enough with the price dataset. The primary keys were mismatched, crime dataset uses 'district' and price dataset uses 'zipcode'. Therefore, we haven't modeled the crime dataset; however, we have explored the dataset thoroughly enough to give anyone who looks at the repo a detailed understanding of the crime dataset per district.
