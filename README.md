@@ -9,6 +9,68 @@ Final Project YouTube Video: https://youtu.be/ZwULz597bu4
 ## Overview
 <p align="justify"> Boston, MA, is a lively city with roughly 45 million people entering the city every year. This includes tourists, new residents, students, and others. Given the rising population of Boston, it is imperative to have a secure system for newcomers to understand the city better. This project aims to assist people learn crucial information about their potential residency, based on factors like crime rate and housing rent.</p>
 
+## Setup Installation
+
+If you don't have make installed, do the following.
+### Installing `make`
+
+### macOS
+
+```xcode-select --install```
+
+### Linux (Ubuntu/Debian)
+```bash
+sudo apt update
+sudo apt install build-essential
+```
+
+### Windows (Git Bash)
+1. Install Git for Windows: https://git-scm.com/downloads  
+2. Open **Git Bash**  
+3. Install `make`:
+```bash
+pacman -S make
+```
+
+After cloning the repository:
+
+```bash
+git clone <repository-url>
+cd <project-folder>
+```
+
+To install all Python and Node dependencies and build the project, run:
+
+```bash
+make
+```
+
+## Available Make Commands
+
+### Install dependencies only
+```bash
+make install
+```
+
+### Build backend and frontend
+```bash
+make build
+```
+
+### Clean temporary files and virtual environment
+```bash
+make clean
+```
+
+### Show all available targets
+```bash
+make help
+```
+
+---
+
+
+
 ## Features
 - ZIP-focused search that evaluate pricing.
 - FastAPI price service that loads a serialized ML model for instant home valuations.
@@ -152,7 +214,6 @@ cd Boston-Area-Price-and-Crime-Prediction
 Open `http://localhost:3000` and the app will call the APIs via the URLs set in `.env.local`.
 
 
-
 ## Sample JSON Responses
 ```json
 // Price prediction
@@ -160,11 +221,6 @@ Open `http://localhost:3000` and the app will call the APIs via the URLs set in 
 
 ```
 
-## Screenshots / UI Preview
-Add your captures to `frontend/public/` and reference them here:
-- `frontend/public/average_value_zipcode.png`
-- `frontend/public/model_eval.png`
-- `frontend/public/search.png`
 
 ## Common Errors & Fixes
 - **Port already in use**: change `PORT` in `.env` or stop the conflicting process.
@@ -172,6 +228,67 @@ Add your captures to `frontend/public/` and reference them here:
 - **Dataset path invalid**: ensure `CRIME_DATA_DIR` contains the expected CSV/JSON files.
 - **CORS blocked**: update `CORS_ALLOW_ORIGINS` in API env files to include your frontend origin.
 - **Env not loaded**: restart servers after editing `.env` files.
+
+
+## Visualization of Data
+
+###Price data visualizations:
+<img width="1017" height="537" alt="Screenshot 2025-12-11 at 1 12 47 AM" src="https://github.com/user-attachments/assets/f3a7a520-455b-4062-8cf6-99dfb8f40b21" />
+<img width="1018" height="558" alt="Screenshot 2025-12-11 at 1 13 26 AM" src="https://github.com/user-attachments/assets/5260c009-43c6-4842-8cda-d2464b2df5ad" />
+<img width="1014" height="559" alt="Screenshot 2025-12-11 at 1 13 38 AM" src="https://github.com/user-attachments/assets/dfa801d7-1e59-4e47-8569-40112eeef252" />
+
+Before modeling, we quickly view the average pricing per zipcode to understand if our model performs accordingly.
+<img width="1004" height="426" alt="Screenshot 2025-12-11 at 1 13 59 AM" src="https://github.com/user-attachments/assets/28c97dbd-c6e8-4d77-8d11-0e13aee4e4bc" />
+
+###Crime data visualizations:
+<img width="1016" height="497" alt="Screenshot 2025-12-11 at 1 15 07 AM" src="https://github.com/user-attachments/assets/8c7aa939-1323-4af7-8159-d2c6688c573f" />
+<img width="977" height="548" alt="Screenshot 2025-12-11 at 1 15 42 AM" src="https://github.com/user-attachments/assets/440bbb94-d0b7-4634-99f0-fe07dfce0d87" />
+<img width="1015" height="547" alt="Screenshot 2025-12-11 at 1 15 55 AM" src="https://github.com/user-attachments/assets/ad4731da-00fa-461e-a07d-ec61a3e74606" />
+<img width="1011" height="746" alt="Screenshot 2025-12-11 at 1 16 07 AM" src="https://github.com/user-attachments/assets/6f9aa27b-45e2-4bfe-b1e5-17edd4c2f03f" />
+
+
+
+
+## Data processing and modeling
+### Price prediction data processing steps:
+- First, we explore our dataset and drop columns that we don't need.
+- Next, we had noticed during visualization that some features were overlapping with the same data but with different names, e.g. ZIPCODE and ZIP_CODE. If we had simply removed all null values we would have lost a substantial amount of data, therefore, we saved crucial data by merging features.
+- Then, we further explored the features and removed features that would be correlated to others, such as, bedrooms and total rooms. These 2 are related which is not ideal when training our models.
+- Lastly, before giving our data to the model, we scaled the data, which is an important step.
+
+  ### Modeling the price prediction model:
+  - Initially we tested a linear regression model with polynomial curve fitting. Next, we trained multiple models to ensure we find the best results.
+  - ```
+    models = {
+    "Linear Regression": LinearRegression(),
+    "Ridge": Ridge(alpha=1.0),
+    "Lasso": Lasso(alpha=0.001),
+    "Random Forest": RandomForestRegressor(n_estimators=500, random_state=42),
+    "Gradient Boosting": GradientBoostingRegressor(random_state=42)
+      }
+```
+
+```xgb_model = XGBRegressor(
+    n_estimators=400,
+    learning_rate=0.05,
+    max_depth=8,
+    subsample=0.8,
+    colsample_bytree=0.8,
+    objective="reg:squarederror",
+    n_jobs=-1
+)
+
+lgbm_model = LGBMRegressor(
+    n_estimators=600,
+    learning_rate=0.05,
+    num_leaves=64,
+    subsample=0.8,
+    colsample_bytree=0.8
+)
+```
+- Next, we chose the evaluation metrics to be RMSE and R squared. We got the highest R squared score from the Random Forest Regressor, 0.97. This means the model was able to capture 97% of variance in the data.
+
+
 
 ## Roadmap
 - Add automated data refresh for crime CSV/JSON drops.
